@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Tasarımları Ekle - Wegtu{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus"></i> Ankete Tasarım Ekle
+                </h4>
+                <small class="text-muted">{{ poll.title }}</small>
+            </div>
+            <div class="card-body">
+                {% if available_designs %}
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.designs.label(class="form-label") }}
+                        {{ form.designs(class="form-select" + (" is-invalid" if form.designs.errors else "")) }}
+                        {% if form.designs.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.designs.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Ankete eklemek istediğiniz tasarımı seçin.</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Bilgi:</strong> Ankete ekleyebileceğiniz tasarım bulunmuyor. 
+                    Önce tasarım yükleyin veya başka kullanıcılardan tasarım onayı alın.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if added_designs %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-circle"></i> Ankete Eklenen Tasarımlar
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for design in added_designs %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='uploads/designs/' + design.image_path) }}" 
+                                 class="card-img-top" style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ design.title }}</h6>
+                                <p class="card-text text-muted small">
+                                    <i class="fas fa-user"></i> {{ design.owner.username }}
+                                    <br>
+                                    <i class="fas fa-tag"></i> {{ design.category }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Anket Bilgileri
+                </h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Başlık:</strong> {{ poll.title }}</p>
+                {% if poll.description %}
+                <p><strong>Açıklama:</strong> {{ poll.description }}</p>
+                {% endif %}
+                <p><strong>Eklenen Tasarım:</strong> {{ added_designs|length }}</p>
+                <p><strong>Durum:</strong> 
+                    <span class="badge bg-{{ 'success' if poll.is_active else 'secondary' }}">
+                        {{ 'Aktif' if poll.is_active else 'Pasif' }}
+                    </span>
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb"></i> İpuçları
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check text-success me-2"></i> Kendi tasarımlarınızı ekleyebilirsiniz</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Onayladığınız başka kullanıcıların tasarımlarını ekleyebilirsiniz</li>
+                    <li><i class="fas fa-info text-info me-2"></i> En az 2 tasarım eklemeniz önerilir</li>
+                    <li><i class="fas fa-arrow-right text-primary me-2"></i> Tasarımları ekledikten sonra anketi aktif hale getirebilirsiniz</li>
+                </ul>
+            </div>
+        </div>
+        
+        {% if added_designs|length >= 2 %}
+        <div class="card mt-3">
+            <div class="card-body text-center">
+                <h6 class="card-title text-success">
+                    <i class="fas fa-check-circle"></i> Anket Hazır!
+                </h6>
+                <p class="card-text">Anketiniz yeterli tasarıma sahip. Forum'da görünür hale getirebilirsiniz.</p>
+                <a href="{{ url_for('main.forum') }}" class="btn btn-success">
+                    <i class="fas fa-eye"></i> Forum'da Görüntüle
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

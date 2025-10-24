@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}QR Kod Hatası - Wegtu{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> QR Kod Hatası
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-times-circle fa-3x text-danger mb-3"></i>
+                    <h5>Geçersiz veya kullanılmış QR kod</h5>
+                    <p class="text-muted">Bu QR kod geçersiz veya daha önce kullanılmış olabilir.</p>
+                </div>
+                
+                <div class="d-grid">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Ana Sayfaya Dön
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="hero-title fade-in-up">
+                <i class="fas fa-rocket"></i> WEGTU'ya Hoş Geldiniz
+            </h1>
+            <p class="hero-subtitle fade-in-up">
+                Tasarımları oylayın, yorum yapın ve toplulukla etkileşime geçin.<br>
+                Profesyonel tasarım dünyasında yerinizi alın.
+            </p>
+            {% if not current_user.is_authenticated %}
+            <a class="btn btn-primary btn-lg pulse" href="{{ url_for('auth.register') }}" role="button">
+                <i class="fas fa-user-plus"></i> Hemen Başla
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4 mb-5">
+        <!-- Feature Cards -->
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card fade-in-up">
+                <div class="feature-icon">
+                    <i class="fas fa-poll"></i>
+                </div>
+                <h4 class="text-white mb-3">Oylama Sistemi</h4>
+                <p class="text-secondary">
+                    Tasarımları oylayın ve en beğenilenleri belirleyin. 
+                    Tier seviyenize göre oy ağırlığınız değişir.
+                </p>
+                <a href="{{ url_for('main.forum') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-arrow-right"></i> Keşfet
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card fade-in-up">
+                <div class="feature-icon">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <h4 class="text-white mb-3">Tier Sistemi</h4>
+                <p class="text-secondary">
+                    QR kod okutarak ve XP kazanarak seviye atlayın. 
+                    Her tier'da yeni özellikler açılır.
+                </p>
+                {% if current_user.is_authenticated %}
+                <div class="mt-3">
+                    <span class="badge tier-{{ current_user.tier }}">
+                        Tier {{ current_user.tier }}
+                    </span>
+                    <small class="text-secondary ms-2">{{ current_user.xp }} XP</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card fade-in-up">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4 class="text-white mb-3">Topluluk</h4>
+                <p class="text-secondary">
+                    Profesyonel tasarımcılarla etkileşime geçin, 
+                    yorum yapın ve geri bildirim alın.
+                </p>
+                <a href="{{ url_for('main.forum') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-comments"></i> Topluluk
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tier Info Section -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Tier Özellikleri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="tier-info-card">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge tier-0 me-3">Tier 0</span>
+                                    <strong>Kayıtlı Kullanıcı</strong>
+                                </div>
+                                <small class="text-secondary">Temel özellikler</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="tier-info-card">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge tier-1 me-3">Tier 1</span>
+                                    <strong>QR Okutarak Aktif Ol</strong>
+                                </div>
+                                <small class="text-secondary">Profil düzenleme</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="tier-info-card">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge tier-2 me-3">Tier 2</span>
+                                    <strong>Tasarım Yükleme</strong>
+                                </div>
+                                <small class="text-secondary">3x oy ağırlığı</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="tier-info-card">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge tier-3 me-3">Tier 3</span>
+                                    <strong>Anket Oluşturma</strong>
+                                </div>
+                                <small class="text-secondary">5x oy ağırlığı</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if current_user.is_authenticated %}
+    <div class="row mt-4">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-qrcode"></i> QR Kod Okut
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-secondary mb-3">
+                        Ürünlerdeki QR kodları okutarak XP kazanın ve tier atlayın!
+                    </p>
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle"></i>
+                        <small>QR kod URL'si: /qr/[kod]</small>
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="startQRScan()">
+                        <i class="fas fa-qrcode"></i> QR Kod Okut
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+</style>
+
+<!-- QR Code Scanner Modal -->
+<div class="modal fade" id="qrScannerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-qrcode"></i> QR Kod Okut
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qr-scanner" style="width: 100%; height: 300px; background: #1e233a; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                    <div>
+                        <i class="fas fa-qrcode fa-4x text-secondary mb-3"></i>
+                        <p class="text-secondary">Kamera açılıyor...</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label class="form-label">veya QR kod URL'sini girin:</label>
+                    <input type="text" id="qr-input" class="form-control" placeholder="/qr/[kod]">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="processQR()">Onayla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function startQRScan() {
+    const modal = new bootstrap.Modal(document.getElementById('qrScannerModal'));
+    modal.show();
+    
+    // Basit kamera açma (modern tarayıcılar için)
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(function(stream) {
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.play();
+            const scannerDiv = document.getElementById('qr-scanner');
+            scannerDiv.innerHTML = '';
+            scannerDiv.appendChild(video);
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            video.style.borderRadius = '8px';
+        })
+        .catch(function(err) {
+            console.log('Kamera erişimi alınamadı:', err);
+            document.getElementById('qr-scanner').innerHTML = 
+                '<div class="text-center p-4"><i class="fas fa-camera text-secondary fa-3x mb-3"></i><p class="text-secondary">Kamera erişimi için izin verin veya QR kod URL\'sini girin</p></div>';
+        });
+}
+
+function processQR() {
+    const qrInput = document.getElementById('qr-input').value.trim();
+    if (qrInput) {
+        // URL'den hash_id'yi çıkar
+        const hashId = qrInput.replace('/qr/', '').replace('/', '');
+        if (hashId) {
+            window.location.href = '/qr/' + hashId;
+        } else {
+            alert('Geçersiz QR kod formatı!');
+        }
+    } else {
+        alert('Lütfen QR kod URL\'sini girin!');
+    }
+}
+</script>
+{% endblock %}
