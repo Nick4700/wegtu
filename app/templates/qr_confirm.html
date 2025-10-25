@@ -23,24 +23,62 @@
                     <strong>+{{ qr.xp_value }} XP</strong> kazanacaksınız!
                 </div>
                 
-                {% if current_user.tier == 0 %}
-                <div class="alert alert-warning">
-                    <i class="fas fa-arrow-up"></i>
-                    <strong>Tier 1'e yükseleceksiniz!</strong>
-                </div>
-                {% endif %}
-                
-                <form method="POST" action="{{ url_for('main.qr_claim', hash_id=qr.hash_id) }}">
-                    <!--{{ csrf_token() }} -->
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-success btn-lg">
-                            <i class="fas fa-check"></i> Onayla ve XP Kazan
-                        </button>
-                        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-times"></i> İptal
-                        </a>
+                {% if requires_login %}
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.tier == 0 %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-arrow-up"></i>
+                            <strong>Tier 1'e yükseleceksiniz!</strong>
+                        </div>
+                        {% endif %}
+                        
+                        <form method="POST" action="{{ url_for('main.qr_claim', hash_id=qr.hash_id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-check"></i> Onayla ve XP Kazan
+                                </button>
+                                <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> İptal
+                                </a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Giriş yapmanız gerekiyor!</strong>
+                            <p class="mb-0 mt-2">QR kodunu kullanmak için önce giriş yapmalısınız.</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('auth.login', next=url_for('main.qr_scan', hash_id=qr.hash_id)) }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                            </a>
+                            <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> İptal
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    {% if current_user.tier == 0 %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-arrow-up"></i>
+                        <strong>Tier 1'e yükseleceksiniz!</strong>
                     </div>
-                </form>
+                    {% endif %}
+                    
+                    <form method="POST" action="{{ url_for('main.qr_claim', hash_id=qr.hash_id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check"></i> Onayla ve XP Kazan
+                            </button>
+                            <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> İptal
+                            </a>
+                        </div>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>

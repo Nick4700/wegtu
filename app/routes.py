@@ -444,7 +444,6 @@ def logout():
 
 # QR kod route'ları
 @main_bp.route('/qr/<string:hash_id>')
-@login_required
 def qr_scan(hash_id):
     qr = QRCode.query.filter_by(hash_id=hash_id).first()
     
@@ -456,7 +455,12 @@ def qr_scan(hash_id):
         flash('Bu QR kod daha önce kullanılmış.', 'error')
         return render_template('qr_error.html')
     
-    return render_template('qr_confirm.html', qr=qr)
+    # Eğer kullanıcı giriş yapmamışsa, onay sayfasını göster
+    if not current_user.is_authenticated:
+        return render_template('qr_confirm.html', qr=qr, requires_login=True)
+    
+    # Giriş yapmışsa direkt onay sayfasını göster
+    return render_template('qr_confirm.html', qr=qr, requires_login=False)
 
 @main_bp.route('/qr/claim/<string:hash_id>', methods=['POST'])
 @login_required
