@@ -552,3 +552,36 @@ def buy_ticket(event_id):
     
     flash(f'Biletiniz kesildi! {event.ticket_xp_reward} XP kazandınız!', 'success')
     return redirect(url_for('main.forum'))
+
+# Admin silme route'ları
+@main_bp.route('/poll/<int:poll_id>/delete', methods=['POST'])
+@login_required
+def delete_poll(poll_id):
+    poll = Poll.query.get_or_404(poll_id)
+    
+    # Admin kontrolü
+    if not current_user.is_admin:
+        abort(403)
+    
+    # Anketi sil
+    db.session.delete(poll)
+    db.session.commit()
+    
+    flash('Anket başarıyla silindi!', 'success')
+    return redirect(url_for('main.forum'))
+
+@main_bp.route('/event/<int:event_id>/delete', methods=['POST'])
+@login_required
+def delete_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    
+    # Admin kontrolü
+    if not current_user.is_admin:
+        abort(403)
+    
+    # Etkinliği sil
+    db.session.delete(event)
+    db.session.commit()
+    
+    flash('Etkinlik başarıyla silindi!', 'success')
+    return redirect(url_for('main.forum'))

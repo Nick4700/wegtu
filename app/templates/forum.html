@@ -76,9 +76,16 @@
                                 </div>
                             </div>
                             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                <a href="{{ url_for('main.poll_detail', poll_id=item.item.id) }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-comment"></i> Yorum Yap
-                                </a>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('main.poll_detail', poll_id=item.item.id) }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-comment"></i> Yorum Yap
+                                    </a>
+                                    {% if current_user.is_authenticated and current_user.is_admin %}
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-type="poll" data-id="{{ item.item.id }}" data-title="{{ item.item.title }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -114,9 +121,16 @@
                                 </div>
                             </div>
                             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                <a href="{{ url_for('main.poll_detail', poll_id=item.item.id) }}" class="btn btn-primary">
-                                    <i class="fas fa-eye"></i> Detayları Gör
-                                </a>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('main.poll_detail', poll_id=item.item.id) }}" class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> Detayları Gör
+                                    </a>
+                                    {% if current_user.is_authenticated and current_user.is_admin %}
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-type="poll" data-id="{{ item.item.id }}" data-title="{{ item.item.title }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -148,23 +162,30 @@
                                 </div>
                             </div>
                             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                {% if current_user.is_authenticated %}
-                                    {% if item.item.has_ticket %}
-                                    <button class="btn btn-success" disabled>
-                                        <i class="fas fa-check"></i> Bilet Alındı
-                                    </button>
-                                    {% else %}
-                                    <form method="POST" action="{{ url_for('main.buy_ticket', event_id=item.item.id) }}" style="display: inline;">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-ticket-alt"></i> Bilet Kes
+                                <div class="btn-group">
+                                    {% if current_user.is_authenticated %}
+                                        {% if item.item.has_ticket %}
+                                        <button class="btn btn-success" disabled>
+                                            <i class="fas fa-check"></i> Bilet Alındı
                                         </button>
-                                    </form>
+                                        {% else %}
+                                        <form method="POST" action="{{ url_for('main.buy_ticket', event_id=item.item.id) }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-ticket-alt"></i> Bilet Kes
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    {% else %}
+                                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                                    </a>
                                     {% endif %}
-                                {% else %}
-                                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">
-                                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
-                                </a>
-                                {% endif %}
+                                    {% if current_user.is_authenticated and current_user.is_admin %}
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-type="event" data-id="{{ item.item.id }}" data-title="{{ item.item.title }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -235,4 +256,64 @@
         </div>
     {% endif %}
 </div>
+
+<!-- Silme Onayı Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Silme Onayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu <span id="itemType"></span> silinecek:</p>
+                <strong id="itemTitle"></strong>
+                <p class="text-danger mt-2">
+                    <i class="fas fa-exclamation-triangle"></i> Bu işlem geri alınamaz!
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteForm = document.getElementById('deleteForm');
+    const itemTypeSpan = document.getElementById('itemType');
+    const itemTitleSpan = document.getElementById('itemTitle');
+    
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const type = button.getAttribute('data-type');
+        const id = button.getAttribute('data-id');
+        const title = button.getAttribute('data-title');
+        
+        // Türkçe isimler
+        const typeNames = {
+            'poll': 'anket',
+            'event': 'etkinlik',
+            'forum': 'forum gönderisi'
+        };
+        
+        itemTypeSpan.textContent = typeNames[type] || type;
+        itemTitleSpan.textContent = title;
+        
+        // Form action'ını ayarla
+        if (type === 'poll') {
+            deleteForm.action = '/poll/' + id + '/delete';
+        } else if (type === 'event') {
+            deleteForm.action = '/event/' + id + '/delete';
+        }
+    });
+});
+</script>
 {% endblock %}

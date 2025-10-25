@@ -7,17 +7,26 @@
     <div class="col-lg-8">
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="mb-0">
-                    {% if is_forum_post %}
-                        <i class="fas fa-comments"></i> {{ poll.title }}
-                    {% else %}
-                        <i class="fas fa-poll"></i> {{ poll.title }}
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="mb-0">
+                            {% if is_forum_post %}
+                                <i class="fas fa-comments"></i> {{ poll.title }}
+                            {% else %}
+                                <i class="fas fa-poll"></i> {{ poll.title }}
+                            {% endif %}
+                        </h3>
+                        <small class="text-muted">
+                            <i class="fas fa-user"></i> {{ poll.creator.username }} • 
+                            <i class="fas fa-clock"></i> {{ poll.created_at.strftime('%d.%m.%Y %H:%M') }}
+                        </small>
+                    </div>
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" data-type="poll" data-id="{{ poll.id }}" data-title="{{ poll.title }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
                     {% endif %}
-                </h3>
-                <small class="text-muted">
-                    <i class="fas fa-user"></i> {{ poll.creator.username }} • 
-                    <i class="fas fa-clock"></i> {{ poll.created_at.strftime('%d.%m.%Y %H:%M') }}
-                </small>
+                </div>
             </div>
             <div class="card-body">
                 {% if poll.description %}
@@ -174,4 +183,64 @@
         </div>
     </div>
 </div>
+
+<!-- Silme Onayı Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Silme Onayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu <span id="itemType"></span> silinecek:</p>
+                <strong id="itemTitle"></strong>
+                <p class="text-danger mt-2">
+                    <i class="fas fa-exclamation-triangle"></i> Bu işlem geri alınamaz!
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteForm = document.getElementById('deleteForm');
+    const itemTypeSpan = document.getElementById('itemType');
+    const itemTitleSpan = document.getElementById('itemTitle');
+    
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const type = button.getAttribute('data-type');
+        const id = button.getAttribute('data-id');
+        const title = button.getAttribute('data-title');
+        
+        // Türkçe isimler
+        const typeNames = {
+            'poll': 'anket',
+            'event': 'etkinlik',
+            'forum': 'forum gönderisi'
+        };
+        
+        itemTypeSpan.textContent = typeNames[type] || type;
+        itemTitleSpan.textContent = title;
+        
+        // Form action'ını ayarla
+        if (type === 'poll') {
+            deleteForm.action = '/poll/' + id + '/delete';
+        } else if (type === 'event') {
+            deleteForm.action = '/event/' + id + '/delete';
+        }
+    });
+});
+</script>
 {% endblock %}
