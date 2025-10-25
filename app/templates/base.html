@@ -24,8 +24,8 @@
     <nav class="navbar navbar-expand-lg fixed-top navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <i class="fas fa-cube"></i>
-                <span class="brand-text">WEGTU</span>
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" height="30">
+                <span class="brand-text"></span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -41,7 +41,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('main.forum') }}">
-                            <i class="fas fa-comments"></i> Forum
+                            <i class="fas fa-comments"></i> Forum & Anket
                         </a>
                     </li>
                 </ul>

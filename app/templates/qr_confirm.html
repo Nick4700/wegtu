@@ -31,7 +31,7 @@
                 {% endif %}
                 
                 <form method="POST" action="{{ url_for('main.qr_claim', hash_id=qr.hash_id) }}">
-                    {{ csrf_token() }}
+                    <!--{{ csrf_token() }} -->
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success btn-lg">
                             <i class="fas fa-check"></i> Onayla ve XP Kazan
