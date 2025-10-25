@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     # Tier Sistemi için temel alanlar
     tier = db.Column(db.Integer, default=0)  # Tier 0: Aktif değil
     xp = db.Column(db.Integer, default=0)
+    is_admin = db.Column(db.Boolean, default=False)  # Admin kontrolü
     
     # Profil bilgileri (Tier 1'de açılacak)
     bio = db.Column(db.Text, nullable=True)
@@ -127,3 +128,37 @@ class QRCode(db.Model):
     
     def __repr__(self):
         return f'<QRCode {self.hash_id}>'
+
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    location = db.Column(db.String(200), nullable=True)
+    event_date = db.Column(db.DateTime, nullable=False)
+    ticket_xp_reward = db.Column(db.Integer, default=20)  # Bilet kesince kazanılacak XP
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # İlişkiler
+    creator = db.relationship('User', backref='created_events')
+    ticket_holders = db.relationship('EventTicket', backref='event', lazy='dynamic', cascade='all, delete-orphan')
+    
+    def __repr__(self):
+        return f'<Event {self.title}>'
+
+class EventTicket(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    ticket_number = db.Column(db.String(50), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # İlişkiler
+    user = db.relationship('User', backref='tickets')
+    
+    # Unique constraint: bir kullanıcı bir etkinliğe sadece bir kez bilet alabilir
+    __table_args__ = (db.UniqueConstraint('user_id', 'event_id', name='unique_user_event_ticket'),)
+    
+    def __repr__(self):
+        return f'<EventTicket {self.ticket_number}>'

@@ -7,7 +7,13 @@
     <div class="col-lg-8">
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="mb-0">{{ poll.title }}</h3>
+                <h3 class="mb-0">
+                    {% if is_forum_post %}
+                        <i class="fas fa-comments"></i> {{ poll.title }}
+                    {% else %}
+                        <i class="fas fa-poll"></i> {{ poll.title }}
+                    {% endif %}
+                </h3>
                 <small class="text-muted">
                     <i class="fas fa-user"></i> {{ poll.creator.username }} • 
                     <i class="fas fa-clock"></i> {{ poll.created_at.strftime('%d.%m.%Y %H:%M') }}
@@ -18,7 +24,11 @@
                 <p class="card-text">{{ poll.description }}</p>
                 {% endif %}
                 
-                {% if not has_voted and current_user.tier >= 1 %}
+                {% if is_forum_post %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Bu bir forum gönderisidir. Yorum yaparak tartışmaya katılabilirsiniz.
+                </div>
+                {% elif not has_voted and current_user.tier >= 1 %}
                 <form method="POST" class="mb-4">
                     {{ vote_form.hidden_tag() }}
                     <h5>Seçenekler:</h5>
@@ -59,7 +69,7 @@
                 </div>
                 {% endif %}
                 
-                {% if results %}
+                {% if results and not is_forum_post %}
                 <h5>Sonuçlar:</h5>
                 <div class="row">
                     {% for option_id, result in results.items() %}
@@ -145,13 +155,16 @@
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-info-circle"></i> Anket Bilgileri
+                    <i class="fas fa-info-circle"></i> {% if is_forum_post %}Gönderi{% else %}Anket{% endif %} Bilgileri
                 </h5>
             </div>
             <div class="card-body">
                 <p><strong>Oluşturan:</strong> {{ poll.creator.username }}</p>
+                {% if not is_forum_post %}
                 <p><strong>Seçenek Sayısı:</strong> {{ poll.options.count() }}</p>
                 <p><strong>Toplam Oy:</strong> {{ poll.votes.count() }}</p>
+                {% endif %}
+                <p><strong>Yorum Sayısı:</strong> {{ comments|length }}</p>
                 <p><strong>Durum:</strong> 
                     <span class="badge bg-{{ 'success' if poll.is_active else 'secondary' }}">
                         {{ 'Aktif' if poll.is_active else 'Pasif' }}

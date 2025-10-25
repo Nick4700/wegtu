@@ -1,72 +1,235 @@
 {% extends "base.html" %}
 
-{% block title %}Forum - Wegtu{% endblock %}
+{% block title %}Topluluk - Wegtu{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>
-            <i class="fas fa-comments"></i> Forum
+            <i class="fas fa-users"></i> Topluluk
         </h2>
-        {% if current_user.is_authenticated and current_user.tier >= 3 %}
-        <a href="{{ url_for('main.create_poll') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Yeni Anket
-        </a>
-        {% endif %}
+        <div>
+            {% if current_user.is_authenticated and current_user.tier >= 3 %}
+            <a href="{{ url_for('main.create_poll') }}" class="btn btn-primary me-2">
+                <i class="fas fa-poll"></i> Yeni Anket
+            </a>
+            {% endif %}
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.create_event') }}" class="btn btn-success">
+                <i class="fas fa-calendar-plus"></i> Etkinlik Oluştur
+            </a>
+            {% endif %}
+        </div>
     </div>
 
-    {% if polls %}
+    <!-- Filtreleme Butonları -->
+    <div class="mb-4">
+        <div class="btn-group" role="group" aria-label="Filtreleme">
+            <a href="{{ url_for('main.forum', filter='all') }}" 
+               class="btn {% if filter_type == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-list"></i> Tümü
+            </a>
+            <a href="{{ url_for('main.forum', filter='forum') }}" 
+               class="btn {% if filter_type == 'forum' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-comments"></i> Forum
+            </a>
+            <a href="{{ url_for('main.forum', filter='polls') }}" 
+               class="btn {% if filter_type == 'polls' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-poll"></i> Anketler
+            </a>
+            <a href="{{ url_for('main.forum', filter='events') }}" 
+               class="btn {% if filter_type == 'events' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-calendar-alt"></i> Etkinlikler
+            </a>
+        </div>
+    </div>
+
+    <!-- İçerikler -->
+    {% if items %}
         <div class="row">
-            {% for poll in polls %}
-            <div class="col-12">
-                <div class="poll-card fade-in-up" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <h5 class="mb-2">{{ poll.title }}</h5>
-                            {% if poll.description %}
-                            <p class="mb-2">{{ poll.description[:150] }}{% if poll.description|length > 150 %}...{% endif %}</p>
-                            {% endif %}
-                            <div class="d-flex align-items-center gap-3">
-                                <small>
-                                    <i class="fas fa-user me-1"></i>{{ poll.creator.username }}
-                                </small>
-                                <small>
-                                    <i class="fas fa-clock me-1"></i>
-                                    {% if poll.is_today %}
-                                        {{ poll.created_at.strftime('%H:%M') }}
-                                    {% else %}
-                                        {% set month_names = {1: 'Ocak', 2: 'Şubat', 3: 'Mart', 4: 'Nisan', 5: 'Mayıs', 6: 'Haziran', 7: 'Temmuz', 8: 'Ağustos', 9: 'Eylül', 10: 'Ekim', 11: 'Kasım', 12: 'Aralık'} %}
-                                        {{ poll.created_at.day }} {{ month_names[poll.created_at.month] }}
+            {% for item in items %}
+            <div class="col-12 mb-3">
+                {% if item.type == 'forum' %}
+                    <!-- Forum Kartı -->
+                    <div class="poll-card fade-in-up" style="animation-delay: {{ loop.index0 * 0.1 }}s; border-left: 4px solid #6c757d;">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-2">
+                                    <i class="fas fa-comments"></i> {{ item.item.title }}
+                                </h5>
+                                {% if item.item.description %}
+                                <p class="mb-2">{{ item.item.description[:150] }}{% if item.item.description|length > 150 %}...{% endif %}</p>
+                                {% endif %}
+                                <div class="d-flex align-items-center gap-3">
+                                    <small>
+                                        <i class="fas fa-user me-1"></i>{{ item.item.creator.username }}
+                                    </small>
+                                    <small>
+                                        <i class="fas fa-clock me-1"></i>
+                                        {% if item.item.is_today %}
+                                            {{ item.item.created_at.strftime('%H:%M') }}
+                                        {% else %}
+                                            {% set month_names = {1: 'Ocak', 2: 'Şubat', 3: 'Mart', 4: 'Nisan', 5: 'Mayıs', 6: 'Haziran', 7: 'Temmuz', 8: 'Ağustos', 9: 'Eylül', 10: 'Ekim', 11: 'Kasım', 12: 'Aralık'} %}
+                                            {{ item.item.created_at.day }} {{ month_names[item.item.created_at.month] }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <a href="{{ url_for('main.poll_detail', poll_id=item.item.id) }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-comment"></i> Yorum Yap
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% elif item.type == 'poll' %}
+                    <!-- Anket Kartı -->
+                    <div class="poll-card fade-in-up" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-2">
+                                    <i class="fas fa-poll"></i> {{ item.item.title }}
+                                </h5>
+                                {% if item.item.description %}
+                                <p class="mb-2">{{ item.item.description[:150] }}{% if item.item.description|length > 150 %}...{% endif %}</p>
+                                {% endif %}
+                                <div class="d-flex align-items-center gap-3">
+                                    <small>
+                                        <i class="fas fa-user me-1"></i>{{ item.item.creator.username }}
+                                    </small>
+                                    <small>
+                                        <i class="fas fa-clock me-1"></i>
+                                        {% if item.item.is_today %}
+                                            {{ item.item.created_at.strftime('%H:%M') }}
+                                        {% else %}
+                                            {% set month_names = {1: 'Ocak', 2: 'Şubat', 3: 'Mart', 4: 'Nisan', 5: 'Mayıs', 6: 'Haziran', 7: 'Temmuz', 8: 'Ağustos', 9: 'Eylül', 10: 'Ekim', 11: 'Kasım', 12: 'Aralık'} %}
+                                            {{ item.item.created_at.day }} {{ month_names[item.item.created_at.month] }}
+                                        {% endif %}
+                                    </small>
+                                    {% if item.item.option_count > 0 %}
+                                    <small>
+                                        <i class="fas fa-list me-1"></i>{{ item.item.option_count }} seçenek
+                                    </small>
                                     {% endif %}
-                                </small>
-                                {% if poll.option_count > 0 %}
-                                <small>
-                                    <i class="fas fa-list me-1"></i>{{ poll.option_count }} seçenek
-                                </small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <a href="{{ url_for('main.poll_detail', poll_id=item.item.id) }}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> Detayları Gör
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% elif item.type == 'event' %}
+                    <!-- Etkinlik Kartı -->
+                    <div class="poll-card fade-in-up" style="animation-delay: {{ loop.index0 * 0.1 }}s; border-left: 4px solid #28a745;">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-2">
+                                    <i class="fas fa-calendar-check"></i> {{ item.item.title }}
+                                </h5>
+                                {% if item.item.description %}
+                                <p class="mb-2">{{ item.item.description[:150] }}{% if item.item.description|length > 150 %}...{% endif %}</p>
+                                {% endif %}
+                                <div class="d-flex align-items-center gap-3 flex-wrap">
+                                    {% if item.item.location %}
+                                    <small>
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ item.item.location }}
+                                    </small>
+                                    {% endif %}
+                                    <small>
+                                        <i class="fas fa-clock me-1"></i>
+                                        {% set month_names = {1: 'Ocak', 2: 'Şubat', 3: 'Mart', 4: 'Nisan', 5: 'Mayıs', 6: 'Haziran', 7: 'Temmuz', 8: 'Ağustos', 9: 'Eylül', 10: 'Ekim', 11: 'Kasım', 12: 'Aralık'} %}
+                                        {{ item.item.event_date.day }} {{ month_names[item.item.event_date.month] }} {{ item.item.event_date.year }}, {{ '%02d'|format(item.item.event_date.hour) }}:{{ '%02d'|format(item.item.event_date.minute) }}
+                                    </small>
+                                    <small>
+                                        <i class="fas fa-gift me-1"></i>{{ item.item.ticket_xp_reward }} XP
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                {% if current_user.is_authenticated %}
+                                    {% if item.item.has_ticket %}
+                                    <button class="btn btn-success" disabled>
+                                        <i class="fas fa-check"></i> Bilet Alındı
+                                    </button>
+                                    {% else %}
+                                    <form method="POST" action="{{ url_for('main.buy_ticket', event_id=item.item.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-ticket-alt"></i> Bilet Kes
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                {% else %}
+                                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                                </a>
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                            <a href="{{ url_for('main.poll_detail', poll_id=poll.id) }}" class="btn btn-primary">
-                                <i class="fas fa-eye"></i> Detayları Gör
-                            </a>
-                        </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <nav aria-label="Sayfalama">
+            <ul class="pagination justify-content-center">
+                {% if has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.forum', filter=filter_type, page=page-1) }}">
+                        <i class="fas fa-chevron-left"></i> Önceki
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Önceki</span>
+                </li>
+                {% endif %}
+
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ p }}</span>
+                    </li>
+                    {% elif p == 1 or p == total_pages or (p >= page - 1 and p <= page + 1) %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.forum', filter=filter_type, page=p) }}">{{ p }}</a>
+                    </li>
+                    {% elif p == page - 2 or p == page + 2 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.forum', filter=filter_type, page=page+1) }}">
+                        Sonraki <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Sonraki</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
     {% else %}
         <div class="text-center py-5">
             <div class="feature-icon mx-auto mb-3">
-                <i class="fas fa-poll"></i>
+                <i class="fas fa-inbox"></i>
             </div>
-            <h4>Henüz anket bulunmuyor</h4>
+            <h4>Henüz içerik bulunmuyor</h4>
             <p>
-                {% if current_user.is_authenticated and current_user.tier >= 3 %}
-                İlk anketi siz oluşturun!
+                {% if current_user.is_authenticated %}
+                İlk içeriği siz oluşturun!
                 {% else %}
-                Tier 3 kullanıcıları anket oluşturabilir.
+                İçerik görmek için giriş yapın.
                 {% endif %}
             </p>
         </div>

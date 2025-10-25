@@ -41,7 +41,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('main.forum') }}">
-                            <i class="fas fa-comments"></i> Forum & Anket
+                            <i class="fas fa-users"></i> Topluluk
                         </a>
                     </li>
                 </ul>
@@ -72,6 +72,11 @@
                                 {% if current_user.tier >= 3 %}
                                 <li><a class="dropdown-item" href="{{ url_for('main.create_poll') }}">
                                     <i class="fas fa-plus-circle"></i> Anket Oluştur
+                                </a></li>
+                                {% endif %}
+                                {% if current_user.is_admin %}
+                                <li><a class="dropdown-item" href="{{ url_for('main.create_event') }}">
+                                    <i class="fas fa-calendar-plus"></i> Etkinlik Oluştur
                                 </a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>

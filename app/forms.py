@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, TextAreaField, PasswordField, BooleanField, SelectField, SubmitField, RadioField
+from wtforms import StringField, TextAreaField, PasswordField, BooleanField, SelectField, SubmitField, RadioField, DateTimeField, IntegerField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 from app.models import User
 
@@ -63,3 +63,11 @@ class CommentForm(FlaskForm):
 class VoteForm(FlaskForm):
     poll_option = RadioField('Seçenek', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Oy Ver')
+
+class EventForm(FlaskForm):
+    title = StringField('Etkinlik Başlığı', validators=[DataRequired(), Length(max=150)])
+    description = TextAreaField('Açıklama', validators=[Length(max=1000)])
+    location = StringField('Konum', validators=[Length(max=200)])
+    event_date = DateTimeField('Etkinlik Tarihi', validators=[DataRequired()], format='%Y-%m-%d %H:%M')
+    ticket_xp_reward = IntegerField('Bilet XP Ödülü', validators=[DataRequired()], default=20)
+    submit = SubmitField('Etkinlik Oluştur')
